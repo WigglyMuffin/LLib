@@ -46,8 +46,4 @@
             <Private>false</Private>
         </Reference>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="ImGui\" />
-    </ItemGroup>
 </Project>
