@@ -27,7 +27,7 @@ partial class LImGui
     private static float _headerCurrentPos = 0;
     private static float _headerImGuiButtonWidth = 0;
 
-    public static bool AddHeaderIcon(DalamudPluginInterface pluginInterface, string id, FontAwesomeIcon icon, HeaderIconOptions options = null)
+    public static bool AddHeaderIcon(DalamudPluginInterface pluginInterface, string id, FontAwesomeIcon icon, HeaderIconOptions? options = null)
     {
         if (ImGui.IsWindowCollapsed()) return false;
 
@@ -45,6 +45,13 @@ partial class LImGui
                 _headerImGuiButtonWidth += 17 * scale;
             if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoCollapse))
                 _headerImGuiButtonWidth += 17 * scale;
+
+            if (!CurrentWindowHasCloseButton() &&
+                GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoCollapse) &&
+                GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.AlwaysAutoResize))
+                _headerImGuiButtonWidth += 5 * scale;
+            else
+                _headerImGuiButtonWidth += 10 * scale;
         }
 
         options ??= new();
