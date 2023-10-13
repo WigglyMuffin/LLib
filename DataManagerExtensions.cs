@@ -11,7 +11,7 @@ namespace LLib;
 
 public static class DataManagerExtensions
 {
-    public static string GetDialogue<T>(IDataManager dataManager, string key, IPluginLog? pluginLog)
+    public static string GetDialogue<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
         where T : QuestDialogueText
     {
         string result = dataManager.GetExcelSheet<T>()!
