@@ -1,6 +1,7 @@
 ﻿using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Dalamud.Plugin.Services;
 
@@ -55,7 +56,8 @@ public sealed class DalamudReflector : IDisposable
             .GetMethod("Get")!.Invoke(null, BindingFlags.Default, null, Array.Empty<object>(), null)!;
     }
 
-    public bool TryGetDalamudPlugin(string internalName, out IDalamudPlugin? instance, bool suppressErrors = false,
+    public bool TryGetDalamudPlugin(string internalName, [MaybeNullWhen(false)] out IDalamudPlugin instance,
+        bool suppressErrors = false,
         bool ignoreCache = false)
     {
         if (!ignoreCache && _pluginCache.TryGetValue(internalName, out instance))
