@@ -11,15 +11,39 @@ namespace LLib;
 
 public static class DataManagerExtensions
 {
-    public static string GetDialogue<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
+    public static SeString? GetSeString<T>(this IDataManager dataManager, string key)
         where T : QuestDialogueText
     {
-        string result = dataManager.GetExcelSheet<T>()!
-            .Single(x => x.Key == key)
-            .Value
-            .ToString();
-        pluginLog?.Verbose($"{typeof(T).Name}.{key} => {result}");
-        return result;
+        return dataManager.GetExcelSheet<T>()?
+            .SingleOrDefault(x => x.Key == key)
+            ?.Value;
+    }
+
+    public static string? GetString<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
+        where T : QuestDialogueText
+    {
+        string? text = GetSeString<T>(dataManager, key)?.ToString();
+
+        pluginLog?.Verbose($"{typeof(T).Name}.{key} => {text}");
+        return text;
+    }
+
+    public static Regex? GetRegex<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
+        where T : QuestDialogueText
+    {
+        SeString? text = GetSeString<T>(dataManager, key);
+        if (text == null)
+            return null;
+
+        string regex = string.Join("", text.Payloads.Select(payload =>
+        {
+            if (payload is TextPayload)
+                return Regex.Escape(payload.RawString);
+            else
+                return ".*";
+        }));
+        pluginLog?.Verbose($"{typeof(T).Name}.{key} => /{regex}/");
+        return new Regex(regex);
     }
 
     public static SeString? GetSeString<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper)
