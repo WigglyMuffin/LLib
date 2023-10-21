@@ -40,7 +40,7 @@ public static class DataManagerExtensions
             if (payload is TextPayload)
                 return Regex.Escape(payload.RawString);
             else
-                return ".*";
+                return "(.*)";
         }));
         pluginLog?.Verbose($"{typeof(T).Name}.{key} => /{regex}/");
         return new Regex(regex);
@@ -77,9 +77,27 @@ public static class DataManagerExtensions
             if (payload is TextPayload)
                 return Regex.Escape(payload.RawString);
             else
-                return ".*";
+                return "(.*)";
         }));
         pluginLog?.Verbose($"{typeof(T).Name}.{rowId} => /{regex}/");
+        return new Regex(regex);
+    }
+
+    public static Regex? GetRegex<T>(this T excelRow, Func<T, SeString?> mapper,  IPluginLog? pluginLog)
+        where T : ExcelRow
+    {
+        SeString? text = mapper(excelRow);
+        if (text == null)
+            return null;
+
+        string regex = string.Join("", text.Payloads.Select(payload =>
+        {
+            if (payload is TextPayload)
+                return Regex.Escape(payload.RawString);
+            else
+                return "(.*)";
+        }));
+        pluginLog?.Verbose($"{typeof(T).Name}.regex => /{regex}/");
         return new Regex(regex);
     }
 }
