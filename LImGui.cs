@@ -1,34 +1,63 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using Dalamud.Interface;
-using Dalamud.Plugin;
+using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
 namespace LLib;
 
-public static partial class LImGui
+public static class LImGui
 {
-    public static void AddPatreonIcon(DalamudPluginInterface pluginInterface)
+    public abstract class LWindow : Window
     {
-        if (AddHeaderIcon(pluginInterface, "##Patreon", FontAwesomeIcon.Heart, new HeaderIconOptions
-            {
-                Tooltip = "Go to patreon.com/lizac",
-                Color = 0xFF3030D0,
-            }))
+        protected bool ClickedHeaderLastFrame;
+        protected bool ClickedHeaderCurrentFrame;
+
+        protected LWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
+            : base(name, flags, forceMainWindow)
         {
-            try
+            TitleBarButtons.Add(new TitleBarButton
             {
-                Process.Start(new ProcessStartInfo
+                Icon = FontAwesomeIcon.Heart,
+                ShowTooltip = () =>
                 {
-                    FileName = "https://www.patreon.com/lizac",
-                    UseShellExecute = true,
-                    Verb = string.Empty,
-                });
-            }
-            catch
-            {
-                // not sure what to do anyway
-            }
+                    ImGui.BeginTooltip();
+                    ImGui.Text("Go to patreon.com/lizac");
+                    ImGui.EndTooltip();
+                },
+                Priority = int.MinValue,
+                IconOffset = new Vector2(1.5f, 1),
+                Click = _ =>
+                {
+                    // when you make a window click-through, `Click` is triggered on each individual frame the mouse button is held down.
+                    ClickedHeaderCurrentFrame = true;
+                    if (ClickedHeaderLastFrame)
+                        return;
+
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "https://www.patreon.com/lizac",
+                            UseShellExecute = true,
+                            Verb = string.Empty,
+                        });
+                    }
+                    catch
+                    {
+                        // not sure what to do anyway
+                    }
+                },
+                AvailableClickthrough = true,
+            });
+        }
+
+        public override void PreDraw()
+        {
+            base.PreDraw();
+
+            ClickedHeaderLastFrame = ClickedHeaderCurrentFrame;
+            ClickedHeaderCurrentFrame = false;
         }
     }
 }
