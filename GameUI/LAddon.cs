@@ -8,6 +8,7 @@ namespace LLib.GameUI;
 public static class LAddon
 {
     private const int UnitListCount = 18;
+
     public static unsafe AtkUnitBase* GetAddonById(uint id)
     {
         var unitManagers = &AtkStage.GetSingleton()->RaptureAtkUnitManager->AtkUnitManager.DepthLayerOneList;
@@ -30,6 +31,9 @@ public static class LAddon
     public static unsafe bool TryGetAddonByName<T>(this IGameGui gameGui, string addonName, out T* addonPtr)
         where T : unmanaged
     {
+        ArgumentNullException.ThrowIfNull(gameGui);
+        ArgumentException.ThrowIfNullOrEmpty(addonName);
+
         var a = gameGui.GetAddonByName(addonName);
         if (a != IntPtr.Zero)
         {

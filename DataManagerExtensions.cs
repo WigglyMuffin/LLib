@@ -14,6 +14,8 @@ public static class DataManagerExtensions
     public static SeString? GetSeString<T>(this IDataManager dataManager, string key)
         where T : QuestDialogueText
     {
+        ArgumentNullException.ThrowIfNull(dataManager);
+
         return dataManager.GetExcelSheet<T>()?
             .SingleOrDefault(x => x.Key == key)
             ?.Value;
@@ -49,6 +51,9 @@ public static class DataManagerExtensions
     public static SeString? GetSeString<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper)
         where T : ExcelRow
     {
+        ArgumentNullException.ThrowIfNull(dataManager);
+        ArgumentNullException.ThrowIfNull(mapper);
+
         var row = dataManager.GetExcelSheet<T>()?.GetRow(rowId);
         if (row == null)
             return null;
@@ -56,7 +61,8 @@ public static class DataManagerExtensions
         return mapper(row);
     }
 
-    public static  string? GetString<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper, IPluginLog? pluginLog = null)
+    public static string? GetString<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper,
+        IPluginLog? pluginLog = null)
         where T : ExcelRow
     {
         string? text = GetSeString(dataManager, rowId, mapper)?.ToString();
@@ -65,7 +71,8 @@ public static class DataManagerExtensions
         return text;
     }
 
-    public static  Regex? GetRegex<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper, IPluginLog? pluginLog = null)
+    public static Regex? GetRegex<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper,
+        IPluginLog? pluginLog = null)
         where T : ExcelRow
     {
         SeString? text = GetSeString(dataManager, rowId, mapper);
@@ -83,9 +90,11 @@ public static class DataManagerExtensions
         return new Regex(regex);
     }
 
-    public static Regex? GetRegex<T>(this T excelRow, Func<T, SeString?> mapper,  IPluginLog? pluginLog)
+    public static Regex? GetRegex<T>(this T excelRow, Func<T, SeString?> mapper, IPluginLog? pluginLog)
         where T : ExcelRow
     {
+        ArgumentNullException.ThrowIfNull(excelRow);
+        ArgumentNullException.ThrowIfNull(mapper);
         SeString? text = mapper(excelRow);
         if (text == null)
             return null;
