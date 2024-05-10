@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -7,10 +9,10 @@ using IG = ImGuiNET.ImGui;
 
 namespace LLib.ImGui;
 
+[SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
 public abstract class LWindow : Window
 {
-    protected bool ClickedHeaderLastFrame { get; private set; }
-    protected bool ClickedHeaderCurrentFrame { get; private set; }
+    private bool _initializedConfig;
 
     protected LWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
         : base(name, flags, forceMainWindow)
@@ -51,11 +53,111 @@ public abstract class LWindow : Window
         });
     }
 
+
+    protected bool ClickedHeaderLastFrame { get; private set; }
+    protected bool ClickedHeaderCurrentFrame { get; private set; }
+
+    protected bool IsPinned
+    {
+        get => InternalIsPinned(this);
+        set => InternalIsPinned(this) = value;
+    }
+
+    protected bool IsClickthrough
+    {
+        get => InternalIsClickthrough(this);
+        set => InternalIsClickthrough(this) = value;
+    }
+
+    protected int? Alpha
+    {
+        get
+        {
+            float? value = InternalAlpha(this);
+            return (int?)(10_0000 * value);
+        }
+        set => InternalAlpha(this) = value / 10_0000f;
+    }
+
+    private void LoadWindowConfig()
+    {
+        if (this is IPersistableWindowConfig pwc)
+        {
+            WindowConfig? config = pwc.WindowConfig;
+            if (config != null)
+            {
+                if (AllowPinning)
+                    IsPinned = config.IsPinned;
+
+                if (AllowClickthrough)
+                    IsClickthrough = config.IsClickthrough;
+
+                Alpha = config.Alpha;
+            }
+
+            _initializedConfig = true;
+        }
+    }
+
+    private void UpdateWindowConfig()
+    {
+        if (this is IPersistableWindowConfig pwc && !IG.IsAnyMouseDown())
+        {
+            WindowConfig? config = pwc.WindowConfig;
+            if (config != null)
+            {
+                bool changed = false;
+                if (AllowPinning && config.IsPinned != IsPinned)
+                {
+                    config.IsPinned = IsPinned;
+                    changed = true;
+                }
+
+                if (AllowClickthrough && config.IsClickthrough != IsClickthrough)
+                {
+                    config.IsClickthrough = IsClickthrough;
+                    changed = true;
+                }
+
+                if (config.Alpha != Alpha)
+                {
+                    config.Alpha = Alpha;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    pwc.SaveWindowConfig();
+                }
+            }
+        }
+    }
+
     public override void PreDraw()
     {
+        if (!_initializedConfig)
+            LoadWindowConfig();
+
         base.PreDraw();
 
         ClickedHeaderLastFrame = ClickedHeaderCurrentFrame;
         ClickedHeaderCurrentFrame = false;
     }
+
+    public override void PostDraw()
+    {
+        base.PostDraw();
+
+        if (_initializedConfig)
+            UpdateWindowConfig();
+    }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "internalIsPinned")]
+    private static extern ref bool InternalIsPinned(Window @this);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "internalIsClickthrough")]
+    private static extern ref bool InternalIsClickthrough(Window @this);
+
+    [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "internalAlpha")]
+    private static extern ref float? InternalAlpha(Window @this);
 }
