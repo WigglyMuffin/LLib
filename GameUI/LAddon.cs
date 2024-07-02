@@ -11,14 +11,14 @@ public static class LAddon
 
     public static unsafe AtkUnitBase* GetAddonById(uint id)
     {
-        var unitManagers = &AtkStage.GetSingleton()->RaptureAtkUnitManager->AtkUnitManager.DepthLayerOneList;
+        var unitManagers = &AtkStage.Instance()->RaptureAtkUnitManager->AtkUnitManager.DepthLayerOneList;
         for (var i = 0; i < UnitListCount; i++)
         {
             var unitManager = &unitManagers[i];
-            foreach (var j in Enumerable.Range(0, Math.Min(unitManager->Count, unitManager->EntriesSpan.Length)))
+            foreach (var j in Enumerable.Range(0, Math.Min(unitManager->Count, unitManager->Entries.Length)))
             {
-                var unitBase = unitManager->EntriesSpan[j].Value;
-                if (unitBase != null && unitBase->ID == id)
+                var unitBase = unitManager->Entries[j].Value;
+                if (unitBase != null && unitBase->Id == id)
                 {
                     return unitBase;
                 }

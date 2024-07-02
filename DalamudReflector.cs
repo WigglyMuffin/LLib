@@ -14,13 +14,13 @@ namespace LLib;
 /// </summary>
 public sealed class DalamudReflector : IDisposable
 {
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
     private readonly IPluginLog _pluginLog;
     private readonly Dictionary<string, IDalamudPlugin> _pluginCache = new();
     private bool _pluginsChanged;
 
-    public DalamudReflector(DalamudPluginInterface pluginInterface, IFramework framework, IPluginLog pluginLog)
+    public DalamudReflector(IDalamudPluginInterface pluginInterface, IFramework framework, IPluginLog pluginLog)
     {
         _pluginInterface = pluginInterface;
         _framework = framework;
