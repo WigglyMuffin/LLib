@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <Target Name="RenameLatestZip" AfterTargets="PackagePlugin" Condition="'$(Configuration)' == 'Release'">
+        <Exec Command="rename $(OutDir)$(AssemblyName)\latest.zip $(AssemblyName)-$(Version).zip"/>
+    </Target>
+</Project>

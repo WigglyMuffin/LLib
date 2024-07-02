@@ -10,17 +10,17 @@
         <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
 
+    <ItemGroup>
+        <SourceLinkGiteaHost Include="git.carvel.li"/>
+    </ItemGroup>
+
     <!-- fix dubious warnings and defaults for dalamud projects that only seem to be an issue after using Dalamud.NET.Sdk -->
     <PropertyGroup>
-        <!-- no idea why this even pop up -->
-        <EnableSourceLink>false</EnableSourceLink>
-
-        <!-- duplicate nuget package references: if any project uses the Dalamud.NET.Sdk, any other project referencing it will yield this warning. -->
-        <NoWarn>$(NoWarn);NU1504</NoWarn>
-
         <!-- no clue which bright ligth thought I don't want to see default items (e.g. .targets files, or the plugin manifest) -->
         <EnableDefaultNoneItems>true</EnableDefaultNoneItems>
     </PropertyGroup>
 
-    <Import Project="Dalamud.Plugin.Bootstrap.targets"/>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.Gitea" Version="8.0.0" PrivateAssets="All"/>
+    </ItemGroup>
 </Project>
