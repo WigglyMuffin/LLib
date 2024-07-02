@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <!-- default settings for nearly all projects -->
+    <PropertyGroup>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DebugType>portable</DebugType>
+        <PathMap Condition="$(SolutionDir) != ''">$(SolutionDir)=X:\</PathMap>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
+
+    <!-- fix dubious warnings and defaults for dalamud projects that only seem to be an issue after using Dalamud.NET.Sdk -->
+    <PropertyGroup>
+        <!-- no idea why this even pop up -->
+        <EnableSourceLink>false</EnableSourceLink>
+
+        <!-- duplicate nuget package references: if any project uses the Dalamud.NET.Sdk, any other project referencing it will yield this warning. -->
+        <NoWarn>$(NoWarn);NU1504</NoWarn>
+
+        <!-- no clue which bright ligth thought I don't want to see default items (e.g. .targets files, or the plugin manifest) -->
+        <EnableDefaultNoneItems>true</EnableDefaultNoneItems>
+    </PropertyGroup>
+
+    <Import Project="Dalamud.Plugin.Bootstrap.targets"/>
+</Project>
