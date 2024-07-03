@@ -17,14 +17,15 @@ public sealed class IconCache : IDisposable
         _textureProvider = textureProvider;
     }
 
-    public ISharedImmediateTexture GetIcon(uint iconId)
+    public IDalamudTextureWrap? GetIcon(uint iconId)
     {
-        if (_textureWraps.TryGetValue(iconId, out ISharedImmediateTexture? iconTex))
-            return iconTex;
+        if (!_textureWraps.TryGetValue(iconId, out ISharedImmediateTexture? iconTex))
+        {
+            iconTex = _textureProvider.GetFromGameIcon(new GameIconLookup(iconId));
+            _textureWraps[iconId] = iconTex;
+        }
 
-        iconTex = _textureProvider.GetFromGameIcon(new GameIconLookup(iconId));
-        _textureWraps[iconId] = iconTex;
-        return iconTex;
+        return iconTex.TryGetWrap(out IDalamudTextureWrap? wrap, out _) ? wrap : null;
     }
 
     public void Dispose()
