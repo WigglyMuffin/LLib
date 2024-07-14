@@ -7,6 +7,8 @@ public static class LAtkValue
 {
     public static unsafe string? ReadAtkString(this AtkValue atkValue)
     {
+        if (atkValue.Type == ValueType.Undefined)
+            return null;
         if (atkValue.String != null)
             return MemoryHelper.ReadSeStringNullTerminated(new nint(atkValue.String)).ToString();
         return null;
