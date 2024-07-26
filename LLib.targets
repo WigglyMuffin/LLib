@@ -4,6 +4,7 @@
     <PropertyGroup>
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
+        <Configurations>Debug;Release</Configurations> <!-- https://github.com/goatcorp/Dalamud.NET.Sdk/issues/2 -->
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <DebugType>portable</DebugType>
         <PathMap Condition="$(SolutionDir) != ''">$(SolutionDir)=X:\</PathMap>
