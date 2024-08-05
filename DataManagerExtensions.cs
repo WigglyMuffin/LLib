@@ -79,15 +79,9 @@ public static class DataManagerExtensions
         if (text == null)
             return null;
 
-        string regex = string.Join("", text.Payloads.Select(payload =>
-        {
-            if (payload is TextPayload)
-                return Regex.Escape(payload.RawString);
-            else
-                return "(.*)";
-        }));
+        Regex regex = text.ToRegex();
         pluginLog?.Verbose($"{typeof(T).Name}.{rowId} => /{regex}/");
-        return new Regex(regex);
+        return regex;
     }
 
     public static Regex? GetRegex<T>(this T excelRow, Func<T, SeString?> mapper, IPluginLog? pluginLog)
@@ -99,14 +93,20 @@ public static class DataManagerExtensions
         if (text == null)
             return null;
 
-        string regex = string.Join("", text.Payloads.Select(payload =>
+        Regex regex = text.ToRegex();
+        pluginLog?.Verbose($"{typeof(T).Name}.regex => /{regex}/");
+        return regex;
+    }
+
+    public static Regex ToRegex(this SeString? text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        return new Regex(string.Join("", text.Payloads.Select(payload =>
         {
             if (payload is TextPayload)
                 return Regex.Escape(payload.RawString);
             else
                 return "(.*)";
-        }));
-        pluginLog?.Verbose($"{typeof(T).Name}.regex => /{regex}/");
-        return new Regex(regex);
+        })));
     }
 }
