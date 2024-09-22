@@ -1,4 +1,4 @@
-﻿namespace Workshoppa.GameData.Shops;
+﻿namespace LLib.Shop.Model;
 
 public sealed class ItemForSale
 {

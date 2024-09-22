@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using Dalamud.Game.Addon.Lifecycle;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
@@ -6,23 +7,11 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using LLib.GameUI;
-using Workshoppa.GameData.Shops;
+using LLib.Shop.Model;
 
 namespace LLib.Shop;
 
-public interface IShopWindow
-{
-    public bool IsEnabled { get; }
-    public bool IsOpen { get; set; }
-    public Vector2? Position { get; set; }
-
-    public int GetCurrencyCount();
-    public unsafe void UpdateShopStock(AtkUnitBase* addon);
-    public unsafe void TriggerPurchase(AtkUnitBase* addonShop, int buyNow);
-    public void SaveExternalPluginState();
-    public void RestoreExternalPluginState();
-}
-
+[SuppressMessage("ReSharper", "ClassCanBeSealed.Global")]
 public class RegularShopBase
 {
     private readonly IShopWindow _parentWindow;
