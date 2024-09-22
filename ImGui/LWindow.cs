@@ -14,8 +14,8 @@ public abstract class LWindow : Window
 {
     private bool _initializedConfig;
 
-    protected LWindow(string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
-        : base(name, flags, forceMainWindow)
+    protected LWindow(string windowName, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
+        : base(windowName, flags, forceMainWindow)
     {
         TitleBarButtons.Add(new TitleBarButton
         {
