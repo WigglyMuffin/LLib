@@ -81,7 +81,8 @@ public sealed class DalamudReflector : IDisposable
                         .GetField("instance", BindingFlags.NonPublic | BindingFlags.Instance)!.GetValue(t);
                     if (plugin == null)
                     {
-                        _pluginLog.Warning($"[DalamudReflector] Found requested plugin {internalName} but it was null");
+                        if (!suppressErrors)
+                            _pluginLog.Warning($"[DalamudReflector] Found requested plugin {internalName} but it was null");
                     }
                     else
                     {
