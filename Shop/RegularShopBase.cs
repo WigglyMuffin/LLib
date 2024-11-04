@@ -86,7 +86,7 @@ public class RegularShopBase
             addon->GetSize(&width, &height, true);
             x += width;
 
-            if ((short)_parentWindow.Position!.Value.X != x || (short)_parentWindow.Position!.Value.Y != y)
+            if (_parentWindow.Position is {} position && ((short)position.X != x || (short)position.Y != y))
                 _parentWindow.Position = new Vector2(x, y);
 
             _parentWindow.IsOpen = true;
