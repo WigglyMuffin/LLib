@@ -1,28 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using Lumina.Excel;
-using Lumina.Excel.CustomSheets;
+using Lumina.Excel.Sheets;
 using Lumina.Text;
-using Lumina.Text.Payloads;
+using Lumina.Text.ReadOnly;
 
 namespace LLib;
 
 public static class DataManagerExtensions
 {
-    public static SeString? GetSeString<T>(this IDataManager dataManager, string key)
-        where T : QuestDialogueText
+    /*
+    public static SeString? GetSeDialogueString(this IDataManager dataManager, string key)
+        where T : struct, IExcelRow<T>
     {
         ArgumentNullException.ThrowIfNull(dataManager);
 
-        return dataManager.GetExcelSheet<T>()?
+        return dataManager.GetExcelSheet<QuestDialogueText>()
             .SingleOrDefault(x => x.Key == key)
-            ?.Value;
+            .Value;
     }
 
     public static string? GetString<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
-        where T : QuestDialogueText
+        where T : struct, IExcelRow<QuestDialogueText>
     {
         string? text = GetSeString<T>(dataManager, key)?.ToString();
 
@@ -31,7 +36,7 @@ public static class DataManagerExtensions
     }
 
     public static Regex? GetRegex<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
-        where T : QuestDialogueText
+        where T : struct, IExcelRow<QuestDialogueText>
     {
         SeString? text = GetSeString<T>(dataManager, key);
         if (text == null)
@@ -47,23 +52,24 @@ public static class DataManagerExtensions
         pluginLog?.Verbose($"{typeof(T).Name}.{key} => /{regex}/");
         return new Regex(regex);
     }
+    */
 
-    public static SeString? GetSeString<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper)
-        where T : ExcelRow
+    public static ReadOnlySeString? GetSeString<T>(this IDataManager dataManager, uint rowId, Func<T, ReadOnlySeString?> mapper)
+        where T : struct, IExcelRow<T>
     {
         ArgumentNullException.ThrowIfNull(dataManager);
         ArgumentNullException.ThrowIfNull(mapper);
 
-        var row = dataManager.GetExcelSheet<T>()?.GetRow(rowId);
+        var row = dataManager.GetExcelSheet<T>().GetRowOrDefault(rowId);
         if (row == null)
             return null;
 
-        return mapper(row);
+        return mapper(row.Value);
     }
 
-    public static string? GetString<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper,
+    public static string? GetString<T>(this IDataManager dataManager, uint rowId, Func<T, ReadOnlySeString?> mapper,
         IPluginLog? pluginLog = null)
-        where T : ExcelRow
+        where T : struct, IExcelRow<T>
     {
         string? text = GetSeString(dataManager, rowId, mapper)?.ToString();
 
@@ -71,11 +77,11 @@ public static class DataManagerExtensions
         return text;
     }
 
-    public static Regex? GetRegex<T>(this IDataManager dataManager, uint rowId, Func<T, SeString?> mapper,
+    public static Regex? GetRegex<T>(this IDataManager dataManager, uint rowId, Func<T, ReadOnlySeString?> mapper,
         IPluginLog? pluginLog = null)
-        where T : ExcelRow
+        where T : struct, IExcelRow<T>
     {
-        SeString? text = GetSeString(dataManager, rowId, mapper);
+        ReadOnlySeString? text = GetSeString(dataManager, rowId, mapper);
         if (text == null)
             return null;
 
@@ -84,12 +90,12 @@ public static class DataManagerExtensions
         return regex;
     }
 
-    public static Regex? GetRegex<T>(this T excelRow, Func<T, SeString?> mapper, IPluginLog? pluginLog)
-        where T : ExcelRow
+    public static Regex? GetRegex<T>(this T excelRow, Func<T, ReadOnlySeString?> mapper, IPluginLog? pluginLog)
+        where T : struct, IExcelRow<T>
     {
         ArgumentNullException.ThrowIfNull(excelRow);
         ArgumentNullException.ThrowIfNull(mapper);
-        SeString? text = mapper(excelRow);
+        ReadOnlySeString? text = mapper(excelRow);
         if (text == null)
             return null;
 
@@ -98,15 +104,28 @@ public static class DataManagerExtensions
         return regex;
     }
 
-    public static Regex ToRegex(this SeString? text)
+    public static Regex ToRegex(this ReadOnlySeString? text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        return new Regex(string.Join("", text.Payloads.Select(payload =>
+        text.Value.ToDalamudString().Payloads;
+        return new Regex(string.Join("", text.Value.Select(payload =>
         {
-            if (payload is TextPayload)
-                return Regex.Escape(payload.RawString);
+            if (payload.Type == ReadOnlySePayloadType.Text)
+                return Regex.Escape(payload.ToString());
             else
                 return "(.*)";
         })));
     }
+}
+
+[SuppressMessage("Performance", "CA1815")]
+public readonly struct QuestDialogueText(ExcelPage page, uint offset, uint row) : IExcelRow<QuestDialogueText>
+{
+    public uint RowId => row;
+
+    public ReadOnlySeString Key => page.ReadString(offset, offset);
+    public ReadOnlySeString Value => page.ReadString(offset + 4, offset);
+
+    static QuestDialogueText IExcelRow<QuestDialogueText>.Create(ExcelPage page, uint offset, uint row) =>
+        new(page, offset, row);
 }
