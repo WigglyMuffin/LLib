@@ -107,7 +107,6 @@ public static class DataManagerExtensions
     public static Regex ToRegex(this ReadOnlySeString? text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        text.Value.ToDalamudString().Payloads;
         return new Regex(string.Join("", text.Value.Select(payload =>
         {
             if (payload.Type == ReadOnlySePayloadType.Text)
