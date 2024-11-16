@@ -15,19 +15,19 @@ namespace LLib;
 
 public static class DataManagerExtensions
 {
-    /*
-    public static SeString? GetSeDialogueString(this IDataManager dataManager, string key)
-        where T : struct, IExcelRow<T>
+    public static ReadOnlySeString? GetSeString<T>(this IDataManager dataManager, string key)
+        where T : struct, IQuestDialogueText, IExcelRow<T>
     {
         ArgumentNullException.ThrowIfNull(dataManager);
 
-        return dataManager.GetExcelSheet<QuestDialogueText>()
-            .SingleOrDefault(x => x.Key == key)
-            .Value;
+        return dataManager.GetExcelSheet<T>()
+            .Cast<T?>()
+            .SingleOrDefault(x => x!.Value.Key == key)
+            ?.Value;
     }
 
     public static string? GetString<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
-        where T : struct, IExcelRow<QuestDialogueText>
+        where T : struct, IQuestDialogueText, IExcelRow<T>
     {
         string? text = GetSeString<T>(dataManager, key)?.ToString();
 
@@ -36,23 +36,22 @@ public static class DataManagerExtensions
     }
 
     public static Regex? GetRegex<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
-        where T : struct, IExcelRow<QuestDialogueText>
+        where T : struct, IQuestDialogueText, IExcelRow<T>
     {
-        SeString? text = GetSeString<T>(dataManager, key);
+        ReadOnlySeString? text = GetSeString<T>(dataManager, key);
         if (text == null)
             return null;
 
-        string regex = string.Join("", text.Payloads.Select(payload =>
+        string regex = string.Join("", text.Select((ReadOnlySePayload payload) =>
         {
-            if (payload is TextPayload)
-                return Regex.Escape(payload.RawString);
+            if (payload.Type == ReadOnlySePayloadType.Text)
+                return Regex.Escape(payload.ToString());
             else
                 return "(.*)";
         }));
         pluginLog?.Verbose($"{typeof(T).Name}.{key} => /{regex}/");
         return new Regex(regex);
     }
-    */
 
     public static ReadOnlySeString? GetSeString<T>(this IDataManager dataManager, uint rowId, Func<T, ReadOnlySeString?> mapper)
         where T : struct, IExcelRow<T>
@@ -117,8 +116,14 @@ public static class DataManagerExtensions
     }
 }
 
+public interface IQuestDialogueText
+{
+    public ReadOnlySeString Key { get; }
+    public ReadOnlySeString Value { get; }
+}
+
 [SuppressMessage("Performance", "CA1815")]
-public readonly struct QuestDialogueText(ExcelPage page, uint offset, uint row) : IExcelRow<QuestDialogueText>
+public readonly struct QuestDialogueText(ExcelPage page, uint offset, uint row) : IQuestDialogueText, IExcelRow<QuestDialogueText>
 {
     public uint RowId => row;
 
