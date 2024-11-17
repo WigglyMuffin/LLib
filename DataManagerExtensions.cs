@@ -123,6 +123,7 @@ public interface IQuestDialogueText
 }
 
 [SuppressMessage("Performance", "CA1815")]
+[Sheet("PleaseSpecifyTheSheetExplicitly")]
 public readonly struct QuestDialogueText(ExcelPage page, uint offset, uint row) : IQuestDialogueText, IExcelRow<QuestDialogueText>
 {
     public uint RowId => row;
