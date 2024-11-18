@@ -219,7 +219,7 @@ public class RegularShopBase
 
                 if (item->ItemId == itemId)
                 {
-                    max += (999 - (int)item->Quantity);
+                    max += (999 - item->Quantity);
                     if (max >= 99)
                         break;
                 }
@@ -247,7 +247,7 @@ public class RegularShopBase
                 if (item == null || item->ItemId == 0)
                     continue;
 
-                if (item->ItemId == itemId && predicate((int)item->Quantity))
+                if (item->ItemId == itemId && predicate(item->Quantity))
                     ++count;
             }
         }
