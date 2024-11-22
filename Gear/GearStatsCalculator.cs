@@ -11,6 +11,8 @@ namespace LLib.Gear;
 
 public sealed class GearStatsCalculator
 {
+    private static readonly uint[] CanHaveOffhand = [2, 6, 8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
+
     private readonly ExcelSheet<Item> _itemSheet;
     private readonly Dictionary<(uint ItemLevel, EBaseParam BaseParam), ushort> _itemLevelStatCaps = [];
     private readonly Dictionary<(EBaseParam BaseParam, int EquipSlotCategory), ushort> _equipSlotCategoryPct;
@@ -35,7 +37,6 @@ public sealed class GearStatsCalculator
         ArgumentNullException.ThrowIfNull(itemSheet);
 
         _itemSheet = itemSheet;
-
 
         foreach (var itemLevel in itemLevelSheet)
         {
@@ -75,7 +76,7 @@ public sealed class GearStatsCalculator
 
         _materiaStats = materiaSheet.Where(x => x.RowId > 0 && x.BaseParam.RowId > 0)
             .ToDictionary(x => x.RowId,
-                x => new MateriaInfo((EBaseParam)x.BaseParam.RowId, x.Value, x.Item[0].RowId == 0));
+                x => new MateriaInfo((EBaseParam)x.BaseParam.RowId, x.Value, x.Item[0].RowId > 0));
     }
 
     public unsafe EquipmentStats CalculateGearStats(InventoryItem* item)
@@ -179,10 +180,46 @@ public sealed class GearStatsCalculator
             MidpointRounding.AwayFromZero);
     }
 
+    // From caraxi/SimpleTweaks
+    public unsafe short CalculateAverageItemLevel(InventoryContainer* container)
+    {
+        uint sum = 0U;
+        var calculatedSlots = 12;
+        for (var i = 0; i < 13; i++) {
+            if (i == 5) // belt
+                continue;
+
+            var inventoryItem = container->GetInventorySlot(i);
+            if (inventoryItem == null || inventoryItem->ItemId == 0) continue;
+
+            var item = _itemSheet.GetRowOrDefault(inventoryItem->ItemId);
+            if (item == null)
+                continue;
+
+            // blue mage weapon
+            if (item.Value.ItemUICategory.RowId == 105) {
+                if (i == 0)
+                    calculatedSlots -= 1;
+                calculatedSlots -= 1;
+                continue;
+            }
+
+            // count main hand weapon twice if no offhand is equippable
+            if (i == 0 && !CanHaveOffhand.Contains(item.Value.ItemUICategory.RowId)) {
+                sum += item.Value.LevelItem.RowId;
+                i++;
+            }
+
+            sum += item.Value.LevelItem.RowId;
+        }
+
+        return (short)(sum / calculatedSlots);
+    }
+
     private sealed record MateriaInfo(EBaseParam BaseParam, Collection<short> Values, bool HasItem);
 }
 
-// From caraxi/SimpleTWeaks
+// From caraxi/SimpleTweaks
 [Sheet("BaseParam")]
 [SuppressMessage("Performance", "CA1815", Justification = "Lumina doesn't implement any equality ops")]
 public readonly unsafe struct ExtendedBaseParam(ExcelPage page, uint offset, uint row)
