@@ -121,7 +121,7 @@ public static class DataManagerExtensions
         return string.Join("", text.Select(payload =>
         {
             if (payload.Type == ReadOnlySePayloadType.Text)
-                return Regex.Escape(payload.ToString());
+                return payload.ToString();
             else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NewLine })
                 return "";
             else
