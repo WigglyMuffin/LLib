@@ -9,6 +9,7 @@ using Dalamud.Utility;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using Lumina.Text;
+using Lumina.Text.Payloads;
 using Lumina.Text.ReadOnly;
 
 namespace LLib;
@@ -29,7 +30,7 @@ public static class DataManagerExtensions
     public static string? GetString<T>(this IDataManager dataManager, string key, IPluginLog? pluginLog)
         where T : struct, IQuestDialogueText, IExcelRow<T>
     {
-        string? text = GetSeString<T>(dataManager, key)?.ToString();
+        string? text = GetSeString<T>(dataManager, key)?.WithCertainMacroCodeReplacements();
 
         pluginLog?.Verbose($"{typeof(T).Name}.{key} => {text}");
         return text;
@@ -70,7 +71,7 @@ public static class DataManagerExtensions
         IPluginLog? pluginLog = null)
         where T : struct, IExcelRow<T>
     {
-        string? text = GetSeString(dataManager, rowId, mapper)?.ToString();
+        string? text = GetSeString(dataManager, rowId, mapper)?.WithCertainMacroCodeReplacements();
 
         pluginLog?.Verbose($"{typeof(T).Name}.{rowId} => {text}");
         return text;
@@ -113,6 +114,19 @@ public static class DataManagerExtensions
             else
                 return "(.*)";
         })));
+    }
+
+    public static string WithCertainMacroCodeReplacements(this ReadOnlySeString text)
+    {
+        return string.Join("", text.Select(payload =>
+        {
+            if (payload.Type == ReadOnlySePayloadType.Text)
+                return Regex.Escape(payload.ToString());
+            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NewLine })
+                return "";
+            else
+                return payload.ToString();
+        }));
     }
 }
 
