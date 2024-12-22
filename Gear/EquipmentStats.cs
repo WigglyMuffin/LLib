@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LLib.Gear;
@@ -30,4 +31,16 @@ public sealed record EquipmentStats(Dictionary<EBaseParam, StatInfo> Stats, byte
 
     public bool Has(EBaseParam substat) => Stats.ContainsKey(substat);
     public bool HasMateria() => Stats.Values.Any(x => x.MateriaValue > 0);
+
+    public bool Equals(EquipmentStats? other)
+    {
+        return other != null &&
+               MateriaCount == other.MateriaCount &&
+               Stats.SequenceEqual(other.Stats);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(MateriaCount, Stats);
+    }
 }
