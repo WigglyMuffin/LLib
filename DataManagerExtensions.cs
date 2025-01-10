@@ -124,6 +124,8 @@ public static class DataManagerExtensions
                 return payload.ToString();
             else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NewLine })
                 return "";
+            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NonBreakingSpace })
+                return " ";
             else
                 return payload.ToString();
         }));
