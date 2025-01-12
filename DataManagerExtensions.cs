@@ -126,6 +126,10 @@ public static class DataManagerExtensions
                 return "";
             else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NonBreakingSpace })
                 return " ";
+            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.Hyphen })
+                return "-";
+            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.SoftHyphen })
+                return ""; // unclear when this is even visible in game; doesn't seem to be in select lists
             else
                 return payload.ToString();
         }));
