@@ -11,6 +11,7 @@ namespace LLib.Gear;
 
 public sealed class GearStatsCalculator
 {
+    private const uint EternityRingItemId = 8575;
     private static readonly uint[] CanHaveOffhand = [2, 6, 8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32];
 
     private readonly ExcelSheet<Item> _itemSheet;
@@ -83,13 +84,16 @@ public sealed class GearStatsCalculator
     {
         List<(uint, byte)> materias = [];
         byte materiaCount = 0;
-        for (int i = 0; i < 5; ++i)
+        if (item->ItemId != EternityRingItemId)
         {
-            var materia = item->Materia[i];
-            if (materia != 0)
+            for (int i = 0; i < 5; ++i)
             {
-                materiaCount++;
-                materias.Add((materia, item->MateriaGrades[i]));
+                var materia = item->Materia[i];
+                if (materia != 0)
+                {
+                    materiaCount++;
+                    materias.Add((materia, item->MateriaGrades[i]));
+                }
             }
         }
 
@@ -174,10 +178,14 @@ public sealed class GearStatsCalculator
 
     public short GetMaximumStatValue(Item item, EBaseParam baseParamValue)
     {
-        return (short)Math.Round(
-            _itemLevelStatCaps[(item.LevelItem.RowId, baseParamValue)] *
-            _equipSlotCategoryPct[(baseParamValue, (int)item.EquipSlotCategory.RowId)] / 1000f,
-            MidpointRounding.AwayFromZero);
+        if (_itemLevelStatCaps.TryGetValue((item.LevelItem.RowId, baseParamValue), out var stat))
+        {
+            return (short)Math.Round(
+                stat * _equipSlotCategoryPct[(baseParamValue, (int)item.EquipSlotCategory.RowId)] / 1000f,
+                MidpointRounding.AwayFromZero);
+        }
+        else
+            return 0;
     }
 
     // From caraxi/SimpleTweaks
