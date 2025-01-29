@@ -36,11 +36,24 @@ public sealed record EquipmentStats(Dictionary<EBaseParam, StatInfo> Stats, byte
     {
         return other != null &&
                MateriaCount == other.MateriaCount &&
-               Stats.SequenceEqual(other.Stats);
+               Stats.SequenceEqual(other.Stats, new KeyValuePairComparer());
     }
 
     public override int GetHashCode()
     {
         return HashCode.Combine(MateriaCount, Stats);
+    }
+
+    private sealed class KeyValuePairComparer : IEqualityComparer<KeyValuePair<EBaseParam, StatInfo>>
+    {
+        public bool Equals(KeyValuePair<EBaseParam, StatInfo> x, KeyValuePair<EBaseParam, StatInfo> y)
+        {
+            return x.Key == y.Key && Equals(x.Value, y.Value);
+        }
+
+        public int GetHashCode(KeyValuePair<EBaseParam, StatInfo> obj)
+        {
+            return HashCode.Combine((int)obj.Key, obj.Value);
+        }
     }
 }
