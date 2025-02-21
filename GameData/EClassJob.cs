@@ -1,4 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace LLib.GameData;
 
@@ -52,6 +54,18 @@ public enum EClassJob : uint
 
 public static class EClassJobExtensions
 {
+    public static bool IsClass(this EClassJob classJob) =>
+        classJob is >= EClassJob.Gladiator and <= EClassJob.Thaumaturge
+            or EClassJob.Arcanist
+            or EClassJob.Rogue
+        || classJob.IsCrafter()
+        || classJob.IsGatherer();
+
+    public static bool HasBaseClass(this EClassJob classJob) =>
+        Enum.GetValues<EClassJob>()
+            .Where(x => x.IsClass())
+            .Any(x => x.AsJob() == classJob);
+
     public static EClassJob AsJob(this EClassJob classJob) => classJob switch
     {
         EClassJob.Gladiator => EClassJob.Paladin,
@@ -117,4 +131,17 @@ public static class EClassJobExtensions
         classJob is >= EClassJob.Carpenter and <= EClassJob.Culinarian;
 
     public static bool IsGatherer(this EClassJob classJob) => classJob is >= EClassJob.Miner and <= EClassJob.Fisher;
+
+    public static string ToFriendlyString(this EClassJob classJob)
+    {
+        return classJob switch
+        {
+            EClassJob.WhiteMage => "White Mage",
+            EClassJob.BlackMage => "Black Mage",
+            EClassJob.DarkKnight => "Dark Knight",
+            EClassJob.RedMage => "Red Mage",
+            EClassJob.BlueMage => "Blue Mage",
+            _ => classJob.ToString(),
+        };
+    }
 }
