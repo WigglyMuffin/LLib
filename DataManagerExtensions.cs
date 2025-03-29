@@ -93,7 +93,6 @@ public static class DataManagerExtensions
     public static Regex? GetRegex<T>(this T excelRow, Func<T, ReadOnlySeString?> mapper, IPluginLog? pluginLog)
         where T : struct, IExcelRow<T>
     {
-        ArgumentNullException.ThrowIfNull(excelRow);
         ArgumentNullException.ThrowIfNull(mapper);
         ReadOnlySeString? text = mapper(excelRow);
         if (text == null)
