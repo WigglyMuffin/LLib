@@ -9,7 +9,7 @@ public static class LAtkValue
     {
         if (atkValue.Type == ValueType.Undefined)
             return null;
-        if (atkValue.String != null)
+        if (atkValue.String.HasValue)
             return MemoryHelper.ReadSeStringNullTerminated(new nint(atkValue.String)).ToString();
         return null;
     }
