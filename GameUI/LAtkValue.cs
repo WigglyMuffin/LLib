@@ -1,4 +1,6 @@
-﻿using Dalamud.Memory;
+﻿using System.Linq;
+using Dalamud.Game.Text.SeStringHandling;
+using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 
 namespace LLib.GameUI;
@@ -10,7 +12,20 @@ public static class LAtkValue
         if (atkValue.Type == ValueType.Undefined)
             return null;
         if (atkValue.String.HasValue)
-            return MemoryHelper.ReadSeStringNullTerminated(new nint(atkValue.String)).ToString();
+            return MemoryHelper.ReadSeStringNullTerminated(new nint(atkValue.String)).WithCertainMacroCodeReplacements();
         return null;
+    }
+}
+
+public static class SeStringExtensions
+{
+    public static string WithCertainMacroCodeReplacements(this SeString? str)
+    {
+        if (str == null)
+            return string.Empty;
+
+        // dalamud doesn't have all payload types that Lumina's SeString has, so we don't even know if certain payloads are e.g. soft hyphens
+        var seString = new Lumina.Text.SeString(str.Encode());
+        return DataManagerExtensions.WithCertainMacroCodeReplacements(seString);
     }
 }

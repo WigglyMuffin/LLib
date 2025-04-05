@@ -119,18 +119,19 @@ public static class DataManagerExtensions
     {
         return string.Join("", text.Select(payload =>
         {
-            if (payload.Type == ReadOnlySePayloadType.Text)
-                return payload.ToString();
-            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NewLine })
-                return "";
-            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.NonBreakingSpace })
-                return " ";
-            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.Hyphen })
-                return "-";
-            else if (payload is { Type: ReadOnlySePayloadType.Macro, MacroCode: MacroCode.SoftHyphen })
-                return ""; // unclear when this is even visible in game; doesn't seem to be in select lists
-            else
-                return payload.ToString();
+            return payload.Type switch
+            {
+                ReadOnlySePayloadType.Text => payload.ToString(),
+                ReadOnlySePayloadType.Macro => payload.MacroCode switch
+                {
+                    MacroCode.NewLine => "",
+                    MacroCode.NonBreakingSpace => " ",
+                    MacroCode.Hyphen => "-",
+                    MacroCode.SoftHyphen => "",
+                    _ => payload.ToString()
+                },
+                _ => payload.ToString()
+            };
         }));
     }
 }
