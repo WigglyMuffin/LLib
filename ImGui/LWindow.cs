@@ -13,6 +13,7 @@ namespace LLib.ImGui;
 public abstract class LWindow : Window
 {
     private bool _initializedConfig;
+    private bool _wasCollapsedLastFrame;
 
     protected LWindow(string windowName, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
         : base(windowName, flags, forceMainWindow)
@@ -53,9 +54,19 @@ public abstract class LWindow : Window
         });
     }
 
-
     protected bool ClickedHeaderLastFrame { get; private set; }
     protected bool ClickedHeaderCurrentFrame { get; private set; }
+    protected bool UncollapseNextFrame { get; set; }
+
+    public bool IsOpenAndUncollapsed
+    {
+        get => IsOpen && !_wasCollapsedLastFrame;
+        set
+        {
+            IsOpen = value;
+            UncollapseNextFrame = value;
+        }
+    }
 
     protected bool IsPinned
     {
@@ -133,15 +144,44 @@ public abstract class LWindow : Window
         }
     }
 
+    public void ToggleOrUncollapse()
+    {
+        IsOpenAndUncollapsed ^= true;
+    }
+
+    #region Dalamud Overrides
+    public override void OnOpen()
+    {
+        UncollapseNextFrame = true;
+        base.OnOpen();
+    }
+
+    public override void Update()
+    {
+        _wasCollapsedLastFrame = true;
+    }
+
     public override void PreDraw()
     {
         if (!_initializedConfig)
             LoadWindowConfig();
 
+        if (UncollapseNextFrame)
+        {
+            IG.SetNextWindowCollapsed(false);
+            UncollapseNextFrame = false;
+        }
+
         base.PreDraw();
 
         ClickedHeaderLastFrame = ClickedHeaderCurrentFrame;
         ClickedHeaderCurrentFrame = false;
+    }
+
+    public override void Draw()
+    {
+        // executed after update
+        _wasCollapsedLastFrame = false;
     }
 
     public override void PostDraw()
@@ -151,6 +191,7 @@ public abstract class LWindow : Window
         if (_initializedConfig)
             UpdateWindowConfig();
     }
+    #endregion
 
     [UnsafeAccessor(UnsafeAccessorKind.Field, Name = "internalIsPinned")]
     private static extern ref bool InternalIsPinned(Window @this);
