@@ -178,11 +178,15 @@ public abstract class LWindow : Window
         ClickedHeaderCurrentFrame = false;
     }
 
-    public override void Draw()
+    public sealed override void Draw()
     {
         // executed after update
         _wasCollapsedLastFrame = false;
+
+        DrawContent();
     }
+
+    public abstract void DrawContent();
 
     public override void PostDraw()
     {
