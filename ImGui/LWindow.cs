@@ -18,40 +18,6 @@ public abstract class LWindow : Window
     protected LWindow(string windowName, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
         : base(windowName, flags, forceMainWindow)
     {
-        TitleBarButtons.Add(new TitleBarButton
-        {
-            Icon = FontAwesomeIcon.Heart,
-            ShowTooltip = () =>
-            {
-                IG.BeginTooltip();
-                IG.Text("Go to patreon.com/lizac");
-                IG.EndTooltip();
-            },
-            Priority = int.MinValue,
-            IconOffset = new Vector2(1.5f, 1),
-            Click = _ =>
-            {
-                // when you make a window click-through, `Click` is triggered on each individual frame the mouse button is held down.
-                ClickedHeaderCurrentFrame = true;
-                if (ClickedHeaderLastFrame)
-                    return;
-
-                try
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "https://www.patreon.com/lizac",
-                        UseShellExecute = true,
-                        Verb = string.Empty,
-                    });
-                }
-                catch
-                {
-                    // not sure what to do anyway
-                }
-            },
-            AvailableClickthrough = true,
-        });
     }
 
     protected bool ClickedHeaderLastFrame { get; private set; }
