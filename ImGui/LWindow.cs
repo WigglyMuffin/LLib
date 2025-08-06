@@ -1,11 +1,7 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Dalamud.Interface;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
-using IG = ImGuiNET.ImGui;
 
 namespace LLib.ImGui;
 
@@ -78,7 +74,7 @@ public abstract class LWindow : Window
 
     private void UpdateWindowConfig()
     {
-        if (this is IPersistableWindowConfig pwc && !IG.IsAnyMouseDown())
+        if (this is IPersistableWindowConfig pwc && !Dalamud.Bindings.ImGui.ImGui.IsAnyMouseDown())
         {
             WindowConfig? config = pwc.WindowConfig;
             if (config != null)
@@ -134,7 +130,7 @@ public abstract class LWindow : Window
 
         if (UncollapseNextFrame)
         {
-            IG.SetNextWindowCollapsed(false);
+            Dalamud.Bindings.ImGui.ImGui.SetNextWindowCollapsed(false);
             UncollapseNextFrame = false;
         }
 

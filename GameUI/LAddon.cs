@@ -35,9 +35,9 @@ public static class LAddon
         ArgumentException.ThrowIfNullOrEmpty(addonName);
 
         var a = gameGui.GetAddonByName(addonName);
-        if (a != IntPtr.Zero)
+        if (!a.IsNull)
         {
-            addonPtr = (T*)a;
+            addonPtr = (T*)a.Address;
             return true;
         }
         else

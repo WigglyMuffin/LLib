@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using Dalamud.Game.Text.SeStringHandling;
+﻿using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Memory;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Text.ReadOnly;
 
 namespace LLib.GameUI;
 
@@ -25,7 +25,7 @@ public static class SeStringExtensions
             return string.Empty;
 
         // dalamud doesn't have all payload types that Lumina's SeString has, so we don't even know if certain payloads are e.g. soft hyphens
-        var seString = new Lumina.Text.SeString(str.Encode());
-        return DataManagerExtensions.WithCertainMacroCodeReplacements(seString);
+        var seString = new ReadOnlySeString(str.Encode());
+        return seString.WithCertainMacroCodeReplacements();
     }
 }
