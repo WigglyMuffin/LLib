@@ -124,7 +124,7 @@ public static class DataManagerExtensions
                 ReadOnlySePayloadType.Text => payload.ToString(),
                 ReadOnlySePayloadType.Macro => payload.MacroCode switch
                 {
-                    MacroCode.NewLine => "",
+                    MacroCode.NewLine => Environment.NewLine,
                     MacroCode.NonBreakingSpace => " ",
                     MacroCode.Hyphen => "-",
                     MacroCode.SoftHyphen => "",
